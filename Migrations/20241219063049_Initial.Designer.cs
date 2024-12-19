@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatAppBackE.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241218083015_Initial migration")]
-    partial class Initialmigration
+    [Migration("20241219063049_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,8 +105,9 @@ namespace ChatAppBackE.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("Conversation_Id");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int")
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("Role");
 
                     b.HasKey("UserId", "ConversationId");

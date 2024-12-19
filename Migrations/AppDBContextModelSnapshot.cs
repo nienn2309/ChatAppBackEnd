@@ -102,8 +102,9 @@ namespace ChatAppBackE.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("Conversation_Id");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int")
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("Role");
 
                     b.HasKey("UserId", "ConversationId");

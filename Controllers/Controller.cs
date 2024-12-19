@@ -62,18 +62,29 @@ namespace ChatAppBackE.Controllers
             return NoContent();
         }
         // Create Conversation
-        [HttpPost]
+        [HttpPost("create-conversation")]
         public async Task<ActionResult<ConversationDto>> CreateConversation(CreateConversationDto conversationDto)
         {
             var conversation = _mapper.Map<Conversation>(conversationDto);
             conversation.ConversationId = Guid.NewGuid().ToString();
             conversation.CreatedAt = DateTime.UtcNow;
 
+            conversation.UserConversations = new List<UserConversation>
+            {
+                new UserConversation
+                {
+                    UserId = conversationDto.OwnerId,
+                    ConversationId = conversation.ConversationId,
+                    Role = UserRole.OWNER
+                }
+            };
+
             _dbContext.Conversations.Add(conversation);
             await _dbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetMessages), new { conversationId = conversation.ConversationId }, _mapper.Map<ConversationDto>(conversation));
+            return CreatedAtAction(nameof(CreateConversation), new { id = conversation.ConversationId }, _mapper.Map<ConversationDto>(conversation));
         }
+
         //Get messages of a specified conversation
         [HttpGet("{conversationId}/messages")]
         public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessages(string conversationId, int page = 1, int pageSize = 10)
@@ -87,6 +98,7 @@ namespace ChatAppBackE.Controllers
 
             return Ok(_mapper.Map<IEnumerable<MessageDto>>(messages));
         }
+
         //Send a message to a specified conversation
         [HttpPost("{conversationId}/messages")]
         public async Task<ActionResult<MessageDto>> SendMessage(string conversationId, CreateMessageDto messageDto)
@@ -122,6 +134,37 @@ namespace ChatAppBackE.Controllers
 
             var conversationList = await conversations.ToListAsync();
             return Ok(_mapper.Map<IEnumerable<ConversationDto>>(conversationList));
+        }
+        //Add a member to a conversation
+        [HttpPost("{conversationId}/add-member")]
+        public async Task<ActionResult> AddMember(string conversationId, AddmemberDTO addmemberDto)
+        {
+            //check conversation, user if the user is already a member of the conversation
+            var conversation = await _dbContext.Conversations.FindAsync(conversationId);
+            if (conversation == null)
+            {
+                return NotFound("Conversation not found");
+            }
+            var user = await _dbContext.Users.FindAsync(addmemberDto.UserId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+            var existingMembership = await _dbContext.UserConversations.FirstOrDefaultAsync(uc => uc.ConversationId == conversationId && uc.UserId == addmemberDto.UserId);
+            if (existingMembership != null)
+            {
+                return BadRequest("User is already a member of this conversation");
+            }
+            var userConversation = new UserConversation
+            {
+                UserId = addmemberDto.UserId,
+                ConversationId = conversationId,
+                Role = UserRole.MEMBER
+            };
+            _dbContext.UserConversations.Add(userConversation);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok("User successfully added to the conversation");
         }
     }
 }

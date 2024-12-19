@@ -42,6 +42,12 @@ namespace ChatAppBackE.Data
                 .HasOne(m => m.User)
                 .WithMany(u => u.Messages)
                 .HasForeignKey(m => m.UserId);
+
+            modelBuilder.Entity<UserConversation>()
+                .Property(m => m.Role)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<UserRole>(v));
         }
     }
 }
