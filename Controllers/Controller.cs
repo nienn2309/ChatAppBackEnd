@@ -8,7 +8,7 @@ using ChatAppBackE.DTO;
 
 namespace ChatAppBackE.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api[controller]")]
     [ApiController]
     public class Controller : ControllerBase
     {
@@ -19,20 +19,109 @@ namespace ChatAppBackE.Controllers
             _dbContext = appDbContext;
             _mapper = mapper;
         }
-
-        [HttpPost]
+        //Add user
+        [HttpPost("add")]
         public async Task<ActionResult<UserDto>> CreateUser(CreateUserDto userDto)
         {
-            var user = new User
+            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == userDto.Username);
+            if (existingUser != null)
             {
-                UserId = Guid.NewGuid().ToString(),
-                Username = userDto.Username
-            };
+                return Ok(_mapper.Map<UserDto>(existingUser));
+            }
 
-            _dbContext.Users.Add(user);
+            var newUser = _mapper.Map<User>(userDto);
+            newUser.UserId = Guid.NewGuid().ToString();
+            _dbContext.Users.Add(newUser);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(_mapper.Map<UserDto>(user));
+            return Ok(newUser);
+        }
+        //Search user by name
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> SearchUser(string username)
+        {
+            var users = await _dbContext.Users
+                .Where(u => u.Username.Contains(username))
+                .ToListAsync();
+
+            return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
+        }
+        //Delete User
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            var user = await _dbContext.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+
+            return NoContent();
+        }
+        // Create Conversation
+        [HttpPost]
+        public async Task<ActionResult<ConversationDto>> CreateConversation(CreateConversationDto conversationDto)
+        {
+            var conversation = _mapper.Map<Conversation>(conversationDto);
+            conversation.ConversationId = Guid.NewGuid().ToString();
+            conversation.CreatedAt = DateTime.UtcNow;
+
+            _dbContext.Conversations.Add(conversation);
+            await _dbContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetMessages), new { conversationId = conversation.ConversationId }, _mapper.Map<ConversationDto>(conversation));
+        }
+        //Get messages of a specified conversation
+        [HttpGet("{conversationId}/messages")]
+        public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessages(string conversationId, int page = 1, int pageSize = 10)
+        {
+            var messages = await _dbContext.Messages
+                .Where(m => m.ConversationId == conversationId)
+                .OrderBy(m => m.SentAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Ok(_mapper.Map<IEnumerable<MessageDto>>(messages));
+        }
+        //Send a message to a specified conversation
+        [HttpPost("{conversationId}/messages")]
+        public async Task<ActionResult<MessageDto>> SendMessage(string conversationId, CreateMessageDto messageDto)
+        {
+            var conversation = await _dbContext.Conversations.FindAsync(conversationId);
+            if (conversation == null)
+            {
+                return NotFound("Conversation not found");
+            }
+
+            var message = _mapper.Map<Message>(messageDto);
+            message.MessageId = Guid.NewGuid().ToString();
+            message.SentAt = DateTime.UtcNow;
+
+            _dbContext.Messages.Add(message);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(_mapper.Map<MessageDto>(message));
+        }
+        //Get list of conversations of a specified user
+        [HttpGet("{userId}/conversations")]
+        public async Task<ActionResult<IEnumerable<ConversationDto>>> GetUserConversations(string userId, string? filter = null)
+        {
+            var conversations = _dbContext.UserConversations
+                .Include(uc => uc.Conversation)
+                .Where(uc => uc.UserId == userId)
+                .Select(uc => uc.Conversation);
+
+            if (!string.IsNullOrEmpty(filter))
+            {
+                conversations = conversations.Where(c => c.Name.Contains(filter));
+            }
+
+            var conversationList = await conversations.ToListAsync();
+            return Ok(_mapper.Map<IEnumerable<ConversationDto>>(conversationList));
         }
     }
 }
