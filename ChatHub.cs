@@ -4,6 +4,31 @@ namespace ChatAppBackE
 {
     public class ChatHub : Hub
     {
+        public async Task SendMessageToGroup(string conversationId, string user, string message)
+        {
+            // Gửi tin nhắn đến nhóm tương ứng với conversationId
+            await Clients.Group(conversationId).SendAsync("ReceiveMessage", user, message);
+        }
+
+        public async Task JoinGroup(string conversationId)
+        {
+            // Thêm người dùng vào nhóm dựa trên conversationId
+            await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
+            Console.WriteLine($"User {Context.ConnectionId} joined group {conversationId}");
+        }
+
+        public async Task LeaveGroup(string conversationId)
+        {
+            // Loại người dùng khỏi nhóm
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId);
+            Console.WriteLine($"User {Context.ConnectionId} left group {conversationId}");
+        }
+
+        public async Task NotifyNewConversation(string conversationId, string name)
+        {
+            await Clients.All.SendAsync("NewConversation", conversationId, name);
+        }
+
         public async Task SendMessage(string user, string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", user, message);

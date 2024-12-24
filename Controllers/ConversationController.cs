@@ -46,13 +46,11 @@ namespace ChatAppBackE.Controllers
 
         // Get messages of a specified conversation
         [HttpGet("{conversationId}/messages")]
-        public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessages(string conversationId, int page = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessages(string conversationId)
         {
             var messages = await _dbContext.Messages
                 .Where(m => m.ConversationId == conversationId)
                 .OrderBy(m => m.SentAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
 
             return Ok(_mapper.Map<IEnumerable<MessageDto>>(messages));
