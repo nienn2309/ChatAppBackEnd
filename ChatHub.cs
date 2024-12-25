@@ -26,11 +26,6 @@ namespace ChatAppBackE
             await Clients.All.SendAsync("NewConversation", conversationId, name);
         }
 
-        public async Task SendMessage(string user, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
-        }
-
         public override Task OnConnectedAsync()
         {
             Console.WriteLine($"User connected: {Context.ConnectionId}");
