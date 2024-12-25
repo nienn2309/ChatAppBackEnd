@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatAppBackE.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241219063049_Initial")]
-    partial class Initial
+    [Migration("20241225072948_intial")]
+    partial class intial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,10 @@ namespace ChatAppBackE.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("Created_At");
+
+                    b.Property<DateTime?>("CurrentMessageTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("Current_message_time");
 
                     b.Property<string>("Name")
                         .IsRequired()

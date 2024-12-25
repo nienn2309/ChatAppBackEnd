@@ -6,7 +6,9 @@ namespace ChatAppBackE
     {
         public async Task SendMessageToGroup(string conversationId, string user, string message)
         {
+            var currentTime = DateTime.UtcNow;
             await Clients.Group(conversationId).SendAsync("ReceiveMessage", user, message, conversationId);
+            await Clients.All.SendAsync("ConversationTimeUpdated", conversationId, currentTime);
         }
 
         public async Task JoinGroup(string conversationId)

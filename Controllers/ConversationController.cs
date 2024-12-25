@@ -70,6 +70,8 @@ namespace ChatAppBackE.Controllers
             message.MessageId = Guid.NewGuid().ToString();
             message.SentAt = DateTime.UtcNow;
 
+            conversation.CurrentMessageTime = message.SentAt;
+
             _dbContext.Messages.Add(message);
             await _dbContext.SaveChangesAsync();
 

@@ -32,6 +32,10 @@ namespace ChatAppBackE.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("Created_At");
 
+                    b.Property<DateTime?>("CurrentMessageTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("Current_message_time");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext")

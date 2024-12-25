@@ -15,6 +15,9 @@ namespace ChatAppBackE.Models
         [Column("Created_At")]
         public DateTime CreatedAt { get; set; }
 
+        [Column("Current_message_time")]
+        public DateTime? CurrentMessageTime { get; set; }
+
         public ICollection<UserConversation> UserConversations { get; set; }
         public ICollection<Message> Messages { get; set; }
     }

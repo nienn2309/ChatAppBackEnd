@@ -5,6 +5,7 @@
         public string ConversationId { get; set; }
         public string Name { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? CurrentMessageTime { get; set; }
     }
 
     public class CreateConversationDto

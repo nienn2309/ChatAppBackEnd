@@ -20,7 +20,7 @@ namespace ChatAppBackE.Controllers
             _mapper = mapper;
         }
 
-        // Get list of conversations of a specified user
+        // Controllers/UserConversationController.cs
         [HttpGet("{userId}/conversations")]
         public async Task<ActionResult<IEnumerable<ConversationDto>>> GetUserConversations(string userId, string? filter = null)
         {
