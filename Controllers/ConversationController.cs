@@ -59,7 +59,7 @@ namespace ChatAppBackE.Controllers
 
         // Send a message to a specified conversation
         [HttpPost("{conversationId}/messages")]
-        public async Task<ActionResult<MessageDto>> SendMessage(string conversationId, CreateMessageDto messageDto, [FromServices] KafkaService kafkaproducer)
+        public async Task<ActionResult<MessageDto>> SendMessage(string conversationId, CreateMessageDto messageDto, [FromServices] KafkaProviderService kafkaproducer)
         {
             var conversation = await _dbContext.Conversations.FindAsync(conversationId);
             if (conversation == null)

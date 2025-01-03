@@ -2,10 +2,10 @@
 
 namespace ChatAppBackE.Service
 {
-    public class KafkaService
+    public class KafkaProviderService
     {
         private readonly IProducer<string, string> _producer;
-        public KafkaService(string server)
+        public KafkaProviderService(string server)
         {
             var config = new ProducerConfig { BootstrapServers = server };
             _producer = new ProducerBuilder<string, string>(config).Build();

@@ -39,5 +39,12 @@ namespace ChatAppBackE
             Console.WriteLine($"User disconnected: {Context.ConnectionId}");
             return base.OnDisconnectedAsync(exception);
         }
+
+        //test
+
+        public async Task SendMessage(string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", message);
+        }
     }
 }

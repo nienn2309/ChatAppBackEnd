@@ -22,7 +22,7 @@ builder.Services.AddSingleton(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
     var server = config["Kafka:Server"];
-    return new KafkaService(server);
+    return new KafkaProviderService(server);
 });
 
 builder.Services.AddDbContext<AppDBContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
@@ -41,6 +41,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHostedService<ConsumerService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,7 +50,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();   
     app.UseSwaggerUI();
-}
+};
 
 app.UseHttpsRedirection();
 
