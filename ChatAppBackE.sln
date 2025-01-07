@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35431.28
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatAppBackE", "ChatAppBackE.csproj", "{29132F3D-75F8-4F24-8C58-904803EA79DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatAppBackE", "ChatAppBackE.csproj", "{29132F3D-75F8-4F24-8C58-904803EA79DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR_Kafka", "..\SignalR_Kafka\SignalR_Kafka.csproj", "{5910FFFC-928E-4C57-BB53-EF9C81796BB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{29132F3D-75F8-4F24-8C58-904803EA79DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29132F3D-75F8-4F24-8C58-904803EA79DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29132F3D-75F8-4F24-8C58-904803EA79DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5910FFFC-928E-4C57-BB53-EF9C81796BB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5910FFFC-928E-4C57-BB53-EF9C81796BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5910FFFC-928E-4C57-BB53-EF9C81796BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5910FFFC-928E-4C57-BB53-EF9C81796BB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
