@@ -59,7 +59,7 @@ namespace ChatAppBackE.Controllers
 
         // Send a message to a specified conversation
         [HttpPost("{conversationId}/messages")]
-        public async Task<ActionResult<MessageDto>> SendMessage(string conversationId, CreateMessageDto messageDto, [FromServices] KafkaProviderService kafkaproducer)
+        public async Task<ActionResult<MessageDto>> SendMessage(string conversationId, CreateMessageDto messageDto)
         {
             var conversation = await _dbContext.Conversations.FindAsync(conversationId);
             if (conversation == null)
@@ -75,10 +75,6 @@ namespace ChatAppBackE.Controllers
 
             _dbContext.Messages.Add(message);
             await _dbContext.SaveChangesAsync();
-
-            // Produce Kafka message
-            var messagePayload = System.Text.Json.JsonSerializer.Serialize(messageDto);
-            await kafkaproducer.StartProducer("chat-messages", conversationId, messagePayload);
 
             return Ok(_mapper.Map<MessageDto>(message));
         }

@@ -1,51 +1,64 @@
-﻿using Confluent.Kafka;
+﻿using ChatAppBackE;
+using ChatAppBackE.Models;
+using Confluent.Kafka;
 using Microsoft.AspNetCore.SignalR;
-using static Confluent.Kafka.ConfigPropertyNames;
-namespace ChatAppBackE.Service
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+namespace ChatAppBackE.Service 
 {
-    public class ConsumerService : BackgroundService
+    public class KafkaConsumerService
     {
-        private readonly IConsumer<Ignore, string> _consumer;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly ConsumerConfig _consumerConfig;
 
-        public ConsumerService(IHubContext<ChatHub> hubContext)
+        public KafkaConsumerService(IHubContext<ChatHub> hubContext)
         {
             _hubContext = hubContext;
-            var consumerConfig = new ConsumerConfig
+
+            // Configure Kafka consumer
+            _consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = "localhost:9092",
-                GroupId = "InventoryConsumerGroup",
+                GroupId = "signalr-group",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
-
-            _consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public void StartConsuming(string topic)
         {
-            _consumer.Subscribe("TestTopic");
-
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Run(() => ProcessKafkaMessage(stoppingToken), stoppingToken);
-                await Task.Delay(10, stoppingToken);
-            }
-            _consumer.Close();
+            Task.Run(() => ConsumeMessagesAsync(topic));
         }
-        public void ProcessKafkaMessage(CancellationToken stoppingToken)
+
+        private async Task ConsumeMessagesAsync(string topic)
         {
-            try
+            using (var consumer = new ConsumerBuilder<string, string>(_consumerConfig).Build())
             {
-                var consumeResult = _consumer.Consume(stoppingToken);
-                var message = consumeResult.Message.Value;
-                _hubContext.Clients.All.SendAsync("ReceiveMessage", consumeResult.Message.Value);
-                Console.WriteLine(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString(), "Error processing Kafka message");
+                consumer.Subscribe(topic);
+
+                try
+                {
+                    while (true)
+                    {
+                        // Consume a message
+                        var consumeResult = consumer.Consume(CancellationToken.None);
+
+                        var conversation_id = consumeResult.Message.Key;
+                        var message = consumeResult.Message.Value;
+                        // Send message to SignalR clients
+                        await _hubContext.Clients.Group(conversation_id).SendAsync("ReceiveMessage", message);
+                        Console.WriteLine($"Message '{message}' sent to conversation '{conversation_id}'");
+                    }
+                }
+                catch (ConsumeException e)
+                {
+                    Console.WriteLine($"Error occurred: {e.Error.Reason}");
+                }
+                finally
+                {
+                    consumer.Close();
+                }
             }
         }
-
     }
 }

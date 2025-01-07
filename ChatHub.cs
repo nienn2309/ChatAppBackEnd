@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using ChatAppBackE.Service;
 
 namespace ChatAppBackE
 {
@@ -7,6 +8,10 @@ namespace ChatAppBackE
         public async Task SendMessageToGroup(string conversationId, string user, string message)
         {
             var currentTime = DateTime.UtcNow;
+            //add
+            var kafkaProducer = new KafkaProducer();
+            await kafkaProducer.SendMessageAsync(conversationId, message, "TestTopic");
+
             await Clients.Group(conversationId).SendAsync("ReceiveMessage", user, message, conversationId);
             await Clients.All.SendAsync("ConversationTimeUpdated", conversationId, currentTime);
         }
@@ -38,13 +43,6 @@ namespace ChatAppBackE
         {
             Console.WriteLine($"User disconnected: {Context.ConnectionId}");
             return base.OnDisconnectedAsync(exception);
-        }
-
-        //test
-
-        public async Task SendMessage(string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", message);
         }
     }
 }
